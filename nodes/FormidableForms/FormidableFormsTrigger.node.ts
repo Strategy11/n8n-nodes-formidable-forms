@@ -20,12 +20,12 @@ export class FormidableFormsTrigger implements INodeType {
 		},
 		inputs: [],
 		outputs: ['main'],
-		/*credentials: [
+		credentials: [
 			{
 				name: 'FormidableFormsApi',
 				required: true,
 			}
-		],*/
+		],
 		webhooks: [
 			{
 				name: 'default',
