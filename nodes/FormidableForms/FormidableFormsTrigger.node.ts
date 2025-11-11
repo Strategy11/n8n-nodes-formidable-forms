@@ -9,7 +9,7 @@ import {
 export class FormidableFormsTrigger implements INodeType {
 	description: INodeTypeDescription = {
 		displayName: 'Formidable Forms Trigger',
-		name: 'formidableForms',
+		name: 'formidableFormsTrigger',
 		icon: 'file:logo.svg',
 		group: ['trigger'],
 		version: 1,
@@ -20,12 +20,6 @@ export class FormidableFormsTrigger implements INodeType {
 		},
 		inputs: [],
 		outputs: ['main'],
-		credentials: [
-			{
-				name: 'FormidableFormsApi',
-				required: true,
-			}
-		],
 		webhooks: [
 			{
 				name: 'default',
@@ -37,21 +31,33 @@ export class FormidableFormsTrigger implements INodeType {
 		],
 		properties: [
 			{
-				displayName: 'Resource',
-				name: 'resource',
+				displayName: 'Authentication',
+				name: 'authentication',
 				type: 'options',
 				noDataExpression: true,
 				options: [
 					{
-						name: 'Submitted values',
-						value: 'values'
+						name: 'Token',
+						value: 'token'
 					},
 					{
-						name: 'Form',
-						value: 'form'
+						name: 'None',
+						value: 'none'
 					}
 				],
-				default: 'values'
+				default: 'none'
+			},
+			{
+				displayName: 'Token',
+				name: 'token',
+				type: 'string',
+				noDataExpression: true,
+				default: '',
+				displayOptions: {
+					show: {
+						authentication: ['token'],
+					}
+				}
 			}
 		]
 	}
@@ -60,25 +66,16 @@ export class FormidableFormsTrigger implements INodeType {
 		// Access the raw HTTP request from n8n's webhook context.
 		const request = this.getRequestObject();
 		const response = this.getResponseObject();
-		if ( ! request.body ) {
-			response.status( 403 ).send( 'Permission denied!' );
-			return {
-				noWebhookResponse: true,
-				workflowData: [
-					[
-						{
-							json: {
-								success: false,
-								message: 'Permission denied!'
-							}
-						}
-					]
-				]
-			}
+		if ( ! request.body || ! request.body.token || request.body.token !== ( this.getNodeParameter( 'token' ) as string ) ) {
+			return showError( response, 403, 'Forbidden!' );
+		}
+
+		if ( ! request.body.event || ! request.body.mapping ) {
+			return showError( response, 400, 'Bad Request!' );
 		}
 
 		// Default: emit parsed JSON items for downstream nodes via helpers.
-		const data = this.helpers.returnJsonArray(request.body as IDataObject[]);
+		const data = this.helpers.returnJsonArray( request.body as IDataObject[] );
 
 		data[0].json.success = true;
 
@@ -86,4 +83,21 @@ export class FormidableFormsTrigger implements INodeType {
 			workflowData: [data],
 		};
 	}
+}
+
+const showError = ( response: any, code: number, message: string ) => {
+	response.status( code ).send( message );
+	return {
+		noWebhookResponse: true,
+		workflowData: [
+			[
+				{
+					json: {
+						success: false,
+						message
+					}
+				}
+			]
+		]
+	};
 }
