@@ -1,15 +1,15 @@
 {
 	"name": "n8n-nodes-formidable-forms",
 	"version": "0.1.0",
-	"description": "",
+	"description": "Listen to the request from Formidable Forms",
 	"license": "MIT",
 	"homepage": "",
 	"keywords": [
 		"n8n-community-node-package"
 	],
 	"author": {
-		"name": "",
-		"email": ""
+		"name": "Strategy11",
+		"email": "steve@strategy11.com"
 	},
 	"repository": {
 		"type": "git",

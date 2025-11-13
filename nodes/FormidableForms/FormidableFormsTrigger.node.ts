@@ -15,6 +15,7 @@ export class FormidableFormsTrigger implements INodeType {
 		version: 1,
 		subtitle: '={{$parameter["operation"] + ": " + $parameter["resource"]}}',
 		description: 'Start a workflow when a Formidable Forms form action triggered',
+		usableAsTool: true,
 		defaults: {
 			name: 'Formidable Forms',
 		},
@@ -51,6 +52,9 @@ export class FormidableFormsTrigger implements INodeType {
 				displayName: 'Token',
 				name: 'token',
 				type: 'string',
+				typeOptions: {
+					password: true,
+				},
 				noDataExpression: true,
 				default: '',
 				displayOptions: {
@@ -65,13 +69,12 @@ export class FormidableFormsTrigger implements INodeType {
 	async webhook(this: IWebhookFunctions): Promise<IWebhookResponseData> {
 		// Access the raw HTTP request from n8n's webhook context.
 		const request = this.getRequestObject();
-		const response = this.getResponseObject();
 		if ( ! request.body || ! request.body.token || request.body.token !== ( this.getNodeParameter( 'token' ) as string ) ) {
-			return showError( response, 403, 'Forbidden!' );
+			return showError( this, 403, 'Forbidden!' );
 		}
 
 		if ( ! request.body.event || ! request.body.mapping ) {
-			return showError( response, 400, 'Bad Request!' );
+			return showError( this, 400, 'Bad Request!' );
 		}
 
 		// Default: emit parsed JSON items for downstream nodes via helpers.
@@ -85,7 +88,8 @@ export class FormidableFormsTrigger implements INodeType {
 	}
 }
 
-const showError = ( response: any, code: number, message: string ) => {
+const showError = ( node: IWebhookFunctions, code: number, message: string ) => {
+	const response = node.getResponseObject();
 	response.status( code ).send( message );
 	return {
 		noWebhookResponse: true,
