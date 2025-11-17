@@ -49,7 +49,7 @@ export class FormidableFormsTrigger implements INodeType {
 			return showError( this, 400, 'Bad Request!' );
 		}
 
-		const nodeToken = this.getNodeParameter( 'token' );
+		const nodeToken = this.getNodeParameter( 'code' );
 		if ( nodeToken && request.body.token !== nodeToken ) {
 			return showError( this, 403, 'Forbidden!' );
 		}
