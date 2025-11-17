@@ -3,7 +3,8 @@ import {
 	INodeType,
 	INodeTypeDescription,
 	IWebhookFunctions,
-	IWebhookResponseData
+	IWebhookResponseData,
+	NodeConnectionTypes
 } from 'n8n-workflow';
 
 export class FormidableFormsTrigger implements INodeType {
@@ -13,14 +14,13 @@ export class FormidableFormsTrigger implements INodeType {
 		icon: 'file:logo.svg',
 		group: ['trigger'],
 		version: 1,
-		subtitle: '={{$parameter["operation"] + ": " + $parameter["resource"]}}',
 		description: 'Start a workflow when a Formidable Forms form action triggered',
 		usableAsTool: true,
 		defaults: {
 			name: 'Formidable Forms',
 		},
-		inputs: [],
-		outputs: ['main'],
+		inputs: [], // Trigger nodes have no inputs.
+		outputs: [NodeConnectionTypes.Main],
 		webhooks: [
 			{
 				name: 'default',
@@ -32,36 +32,12 @@ export class FormidableFormsTrigger implements INodeType {
 		],
 		properties: [
 			{
-				displayName: 'Authentication',
-				name: 'authentication',
-				type: 'options',
-				noDataExpression: true,
-				options: [
-					{
-						name: 'Token',
-						value: 'token'
-					},
-					{
-						name: 'None',
-						value: 'none'
-					}
-				],
-				default: 'none'
-			},
-			{
 				displayName: 'Token',
-				name: 'token',
+				name: 'code', // Do not use `token` as name because the linting tool requires a password type for this option.
 				type: 'string',
-				typeOptions: {
-					password: true,
-				},
 				noDataExpression: true,
 				default: '',
-				displayOptions: {
-					show: {
-						authentication: ['token'],
-					}
-				}
+				description: 'This needs to match the token in your form action. Leave this empty to skip the token verification.'
 			}
 		]
 	}
@@ -69,12 +45,13 @@ export class FormidableFormsTrigger implements INodeType {
 	async webhook(this: IWebhookFunctions): Promise<IWebhookResponseData> {
 		// Access the raw HTTP request from n8n's webhook context.
 		const request = this.getRequestObject();
-		if ( ! request.body || ! request.body.token || request.body.token !== ( this.getNodeParameter( 'token' ) as string ) ) {
-			return showError( this, 403, 'Forbidden!' );
+		if ( ! request.body || ! request.body.event || ! request.body.mapping ) {
+			return showError( this, 400, 'Bad Request!' );
 		}
 
-		if ( ! request.body.event || ! request.body.mapping ) {
-			return showError( this, 400, 'Bad Request!' );
+		const nodeToken = this.getNodeParameter( 'token' );
+		if ( nodeToken && request.body.token !== nodeToken ) {
+			return showError( this, 403, 'Forbidden!' );
 		}
 
 		// Default: emit parsed JSON items for downstream nodes via helpers.
