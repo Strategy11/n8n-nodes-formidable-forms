@@ -13,7 +13,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/formidable-forms/n8n-nodes-formidable-forms.git"
+    "url": "git+https://github.com/Strategy11/n8n-nodes-formidable-forms.git"
   },
   "scripts": {
     "build": "n8n-node build",
