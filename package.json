@@ -1,6 +1,6 @@
 {
   "name": "n8n-nodes-formidable-forms",
-  "version": "0.1.2",
+  "version": "0.1.4",
   "description": "Listen to the request from Formidable Forms",
   "license": "MIT",
   "homepage": "",
