@@ -36,6 +36,7 @@ export class FormidableFormsTrigger implements INodeType {
 				displayName: 'Token',
 				name: 'code', // Do not use `token` as name because the linting tool requires a password type for this option.
 				type: 'string',
+				typeOptions: { password: true },
 				noDataExpression: true,
 				default: '',
 				description: 'This needs to match the token in your form action. Leave this empty to skip the token verification.'
