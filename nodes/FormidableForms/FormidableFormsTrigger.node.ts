@@ -1,5 +1,8 @@
 import {
+	ICredentialTestFunctions,
+	ICredentialsDecrypted,
 	IDataObject,
+	INodeCredentialTestResult,
 	INodeType,
 	INodeTypeDescription,
 	IWebhookFunctions,
@@ -42,6 +45,27 @@ export class FormidableFormsTrigger implements INodeType {
 		],
 		properties: []
 	}
+
+	methods = {
+		credentialTest: {
+			async formidableFormsApiTest(
+				this: ICredentialTestFunctions,
+				credential: ICredentialsDecrypted,
+			): Promise<INodeCredentialTestResult> {
+				const token = ( credential.data as IDataObject ).token as string;
+				if ( ! token ) {
+					return {
+						status: 'Error',
+						message: 'Token is required',
+					};
+				}
+				return {
+					status: 'OK',
+					message: 'Token is set. It will be verified when a webhook request is received.',
+				};
+			},
+		},
+	};
 
 	async webhook(this: IWebhookFunctions): Promise<IWebhookResponseData> {
 		// Access the raw HTTP request from n8n's webhook context.
