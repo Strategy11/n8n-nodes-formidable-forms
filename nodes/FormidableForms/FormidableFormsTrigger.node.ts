@@ -1,10 +1,14 @@
 import {
+	ICredentialTestFunctions,
+	ICredentialsDecrypted,
 	IDataObject,
+	INodeCredentialTestResult,
 	INodeType,
 	INodeTypeDescription,
 	IWebhookFunctions,
 	IWebhookResponseData,
-	NodeConnectionTypes
+	NodeConnectionTypes,
+	NodeOperationError,
 } from 'n8n-workflow';
 
 export class FormidableFormsTrigger implements INodeType {
@@ -21,6 +25,15 @@ export class FormidableFormsTrigger implements INodeType {
 		},
 		inputs: [], // Trigger nodes have no inputs.
 		outputs: [NodeConnectionTypes.Main],
+		credentials: [
+			{
+				name: 'formidableFormsApi',
+				required: false,
+				displayOptions: {
+					show: {},
+				},
+			},
+		],
 		webhooks: [
 			{
 				name: 'default',
@@ -30,28 +43,45 @@ export class FormidableFormsTrigger implements INodeType {
 				path: 'webhook',
 			}
 		],
-		properties: [
-			{
-				displayName: 'Token',
-				name: 'code', // Do not use `token` as name because the linting tool requires a password type for this option.
-				type: 'string',
-				noDataExpression: true,
-				default: '',
-				description: 'This needs to match the token in your form action. Leave this empty to skip the token verification.'
-			}
-		]
+		properties: []
 	}
+
+	methods = {
+		credentialTest: {
+			async formidableFormsApiTest(
+				this: ICredentialTestFunctions,
+				credential: ICredentialsDecrypted,
+			): Promise<INodeCredentialTestResult> {
+				const token = ( credential.data as IDataObject ).token as string;
+				if ( ! token ) {
+					return {
+						status: 'Error',
+						message: 'Token is required',
+					};
+				}
+				return {
+					status: 'OK',
+					message: 'Token is set. It will be verified when a webhook request is received.',
+				};
+			},
+		},
+	};
 
 	async webhook(this: IWebhookFunctions): Promise<IWebhookResponseData> {
 		// Access the raw HTTP request from n8n's webhook context.
 		const request = this.getRequestObject();
 		if ( ! request.body || ! request.body.event || ! request.body.mapping ) {
-			return showError( this, 400, 'Bad Request!' );
+			throw new NodeOperationError( this.getNode(), 'Bad Request!', {
+				description: 'Request body is missing required fields: event, mapping',
+			} );
 		}
 
-		const nodeToken = this.getNodeParameter( 'code' );
+		const credentials = await this.getCredentials( 'formidableFormsApi' );
+		const nodeToken = credentials.token as string;
 		if ( nodeToken && request.body.token !== nodeToken ) {
-			return showError( this, 403, 'Forbidden!' );
+			throw new NodeOperationError( this.getNode(), 'Forbidden!', {
+				description: 'The token in the request does not match the token configured in the node',
+			} );
 		}
 
 		// Default: emit parsed JSON items for downstream nodes via helpers.
@@ -63,22 +93,4 @@ export class FormidableFormsTrigger implements INodeType {
 			workflowData: [data],
 		};
 	}
-}
-
-const showError = ( node: IWebhookFunctions, code: number, message: string ) => {
-	const response = node.getResponseObject();
-	response.status( code ).send( message );
-	return {
-		noWebhookResponse: true,
-		workflowData: [
-			[
-				{
-					json: {
-						success: false,
-						message
-					}
-				}
-			]
-		]
-	};
 }
