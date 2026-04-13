@@ -22,6 +22,15 @@ export class FormidableFormsTrigger implements INodeType {
 		},
 		inputs: [], // Trigger nodes have no inputs.
 		outputs: [NodeConnectionTypes.Main],
+		credentials: [
+			{
+				name: 'formidableFormsApi',
+				required: false,
+				displayOptions: {
+					show: {},
+				},
+			},
+		],
 		webhooks: [
 			{
 				name: 'default',
@@ -31,17 +40,7 @@ export class FormidableFormsTrigger implements INodeType {
 				path: 'webhook',
 			}
 		],
-		properties: [
-			{
-				displayName: 'Token',
-				name: 'code', // Do not use `token` as name because the linting tool requires a password type for this option.
-				type: 'string',
-				typeOptions: { password: true },
-				noDataExpression: true,
-				default: '',
-				description: 'This needs to match the token in your form action. Leave this empty to skip the token verification.'
-			}
-		]
+		properties: []
 	}
 
 	async webhook(this: IWebhookFunctions): Promise<IWebhookResponseData> {
@@ -53,7 +52,8 @@ export class FormidableFormsTrigger implements INodeType {
 			} );
 		}
 
-		const nodeToken = this.getNodeParameter( 'code' );
+		const credentials = await this.getCredentials( 'formidableFormsApi' );
+		const nodeToken = credentials.token as string;
 		if ( nodeToken && request.body.token !== nodeToken ) {
 			throw new NodeOperationError( this.getNode(), 'Forbidden!', {
 				description: 'The token in the request does not match the token configured in the node',
