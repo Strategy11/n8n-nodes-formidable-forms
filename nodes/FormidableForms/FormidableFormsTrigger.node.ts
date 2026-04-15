@@ -29,9 +29,6 @@ export class FormidableFormsTrigger implements INodeType {
 			{
 				name: 'formidableFormsApi',
 				required: true,
-				displayOptions: {
-					show: {},
-				},
 			},
 		],
 		webhooks: [
