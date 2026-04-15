@@ -3,7 +3,7 @@
   "version": "0.2.0",
   "description": "Listen to the request from Formidable Forms",
   "license": "MIT",
-  "homepage": "",
+  "homepage": "https://github.com/Strategy11/n8n-nodes-formidable-forms",
   "keywords": [
     "n8n-community-node-package"
   ],
