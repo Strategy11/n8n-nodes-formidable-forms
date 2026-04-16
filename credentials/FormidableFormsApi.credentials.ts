@@ -9,7 +9,6 @@ export class FormidableFormsApi implements ICredentialType {
 	displayName = 'Formidable Forms API';
 	documentationUrl = 'https://formidableforms.com/knowledgebase/n8n/';
 	icon: Icon = 'file:../nodes/FormidableForms/logo.svg';
-	testedBy = 'formidableFormsApiTest';
 	properties: INodeProperties[] = [
 		{
 			displayName: 'Token',
