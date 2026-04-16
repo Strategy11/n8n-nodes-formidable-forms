@@ -28,10 +28,8 @@ export class FormidableFormsTrigger implements INodeType {
 		credentials: [
 			{
 				name: 'formidableFormsApi',
-				required: false,
-				displayOptions: {
-					show: {},
-				},
+				required: true,
+				testedBy: 'formidableFormsApiTest',
 			},
 		],
 		webhooks: [
