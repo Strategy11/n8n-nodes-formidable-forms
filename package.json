@@ -1,6 +1,6 @@
 {
   "name": "n8n-nodes-formidable-forms",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Listen to the request from Formidable Forms",
   "license": "MIT",
   "homepage": "https://github.com/Strategy11/n8n-nodes-formidable-forms",
