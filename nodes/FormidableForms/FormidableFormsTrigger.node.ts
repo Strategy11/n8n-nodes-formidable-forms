@@ -19,6 +19,7 @@ export class FormidableFormsTrigger implements INodeType {
 		group: ['trigger'],
 		version: 1,
 		description: 'Start a workflow when a Formidable Forms form action triggered',
+		subtitle: 'on form action',
 		usableAsTool: true,
 		defaults: {
 			name: 'Formidable Forms',
